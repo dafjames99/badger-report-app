@@ -1,36 +1,33 @@
+import 'server-only';
+
 import nodemailer from 'nodemailer';
+import {
+  buildReportEmailHtml,
+  photoAttachments,
+  type EmailTemplateId,
+  type ReportEmailData,
+  type ReportPhoto,
+} from './email-templates';
 
-const EVIDENCE_CID = 'evidence-photo';
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-export interface ReportPhoto {
-  buffer: Buffer;
-  filename: string;
-  mimeType: string;
-}
+export type { ReportPhoto } from './email-templates';
 
 export interface EmailResult {
   sent: boolean;
   skipped: boolean;
 }
 
+const DEFAULT_TEMPLATE: EmailTemplateId = 'table';
+
+function resolveTemplate(): EmailTemplateId {
+  const fromEnv = process.env.EMAIL_TEMPLATE;
+  if (fromEnv === 'table' || fromEnv === 'card' || fromEnv === 'classic') {
+    return fromEnv;
+  }
+  return DEFAULT_TEMPLATE;
+}
+
 export const sendReportEmail = async (
-  report: {
-    id: string;
-    timestamp: number;
-    location: { latitude: number; longitude: number; accuracyMeters: number };
-    suitability: { collectionSuitable: boolean };
-    reporter: { name?: string; email?: string; phone?: string };
-    extraInformation?: string;
-  },
+  report: ReportEmailData,
   photo?: ReportPhoto
 ): Promise<EmailResult> => {
   const host = process.env.EMAIL_SERVER_HOST;
@@ -45,6 +42,9 @@ export const sendReportEmail = async (
     return { sent: false, skipped: true };
   }
 
+  const template = resolveTemplate();
+  const hasPhoto = Boolean(photo);
+
   const transporter = nodemailer.createTransport({
     host,
     port,
@@ -52,39 +52,14 @@ export const sendReportEmail = async (
     auth: { user, pass },
   });
 
-  const photoSection = photo
-    ? `<p><strong>Evidence photo:</strong> attached to this message (preview below).</p>
-       <p><img src="cid:${EVIDENCE_CID}" alt="Evidence photo" style="max-width:100%;height:auto;border-radius:8px;" /></p>`
-    : '<p><strong>Evidence photo:</strong> none submitted.</p>';
-
-  const html = `
-    <h1>New Badger Carcass Report</h1>
-    <p><strong>Report ID:</strong> ${report.id}</p>
-    <p><strong>Timestamp:</strong> ${new Date(report.timestamp).toLocaleString()}</p>
-    <p><strong>Location:</strong> ${report.location.latitude}, ${report.location.longitude} (±${report.location.accuracyMeters}m)</p>
-    <p><strong>Suitable for Collection:</strong> ${report.suitability.collectionSuitable ? 'Yes' : 'No'}</p>
-    <p><strong>Reporter:</strong> ${report.reporter.name || 'Anonymous'} (${report.reporter.email || 'N/A'})</p>
-    <p><strong>Extra information:</strong> ${report.extraInformation?.trim() ? escapeHtml(report.extraInformation.trim()).replace(/\n/g, '<br />') : 'None provided.'}</p>
-    ${photoSection}
-  `;
-
-  const attachments = photo
-    ? [
-        {
-          filename: photo.filename,
-          content: photo.buffer,
-          contentType: photo.mimeType,
-          cid: EVIDENCE_CID,
-        },
-      ]
-    : undefined;
+  const html = buildReportEmailHtml(report, template, hasPhoto);
 
   await transporter.sendMail({
     from,
     to,
     subject: `Badger Report: ${new Date(report.timestamp).toLocaleDateString()} (${report.id})`,
     html,
-    attachments,
+    attachments: photoAttachments(photo),
   });
 
   return { sent: true, skipped: false };
