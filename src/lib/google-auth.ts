@@ -8,9 +8,6 @@ export const getGoogleAuth = () => {
 
   return new google.auth.GoogleAuth({
     keyFile: keyFilePath,
-    scopes: [
-      'https://www.googleapis.com/auth/drive.file',
-      'https://www.googleapis.com/auth/spreadsheets',
-    ],
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 };

@@ -58,11 +58,12 @@ POST Full Payload
                                                        │
                     +──────────────────────────────────┼──────────────────────────────────+
                     │                                  │                                  │
-                    ▼                                  ▼                                  ▼
-         +────────────────────+             +────────────────────+             +────────────────────+
-         │  Google Drive API  │             │  Google Sheets API │             │   Mailing Engine   │
-         │ (Binary Target Dir)│             │ (Metadata Logging) │             │ (Structured Email) │
-         +────────────────────+             +────────────────────+             +────────────────────+
+                    ▼                                  ▼
+         +────────────────────+             +────────────────────+
+         │  Google Sheets API │             │   Mailing Engine   │
+         │ (Metadata Logging) │             │ (Photo + summary;  │
+         │ Photo col = text   │             │  not stored server)│
+         +────────────────────+             +────────────────────+
 
 ### Architectural Component Specifications
 
@@ -79,7 +80,7 @@ The MVP must implement precisely four high-level criteria within a single-page, 
 
 | Ref | Feature | Type | Behavioral Rule |
 | :--- | :--- | :--- | :--- |
-| **F-01** | **Photo Capture / Upload** | *Optional* | Standard input (`type="file"`, `accept="image/*"`). Must compress images client-side before committing to local IndexedDB storage to limit resource overhead. |
+| **F-01** | **Photo Capture / Upload** | *Optional* | Standard input (`type="file"`, `accept="image/*"`). Must compress images client-side before committing to local IndexedDB storage to limit resource overhead. On sync, photos are sent **only** in the alert email (inline + attachment); they are **not** stored in cloud file storage or in the sheet. |
 | **F-02** | **Location Capture** | **REQUIRED** | Implicitly queries `navigator.geolocation.getCurrentPosition`. **Rule:** If offline, do not render a broken map frame. Provide a clear, textual status confirmation showing resolved coordinates and accuracy bounds (e.g., `±15m`). |
 | **F-03** | **Collection Suitability** | **REQUIRED** | A single toggle or checkbox explicit input indicating whether the carcass is intact (`true`/`false`), signaling collection viability to workers. |
 | **F-04** | **Reporter Metadata** | *Optional* | Text input fields capturing `Name`, `Email`, and `Phone`. Persisted locally across sessions via a secondary configuration object for ease of repeatable entry. |
@@ -172,9 +173,8 @@ This phase layout maps directly to sequential execution instructions for Google 
 ### Phase 4: Integrations Ingest Pipeline & External APIs
 
 * **Task 4.1:** Establish the ingestion route handler. Parse multi-part request contents safely, verifying the payload layout structure against the system's strict schema rules.
-* **Task 4.2:** Integrate Google Drive integration paths using **Google Cloud Service Account** JWT authentication keys. Stream incoming binary file data directly into a dedicated folder directory. Return the permanent, publicly resolvable viewing reference URL string.
-* **Task 4.3:** Integrate Google Sheets updates via service account pathways. Map report fields, timestamps, location numbers, and the newly generated Google Drive file access link string into a new row insertion sequence.
-* **Task 4.4:** Configure an automated email dispatch routine using a standard transaction tool (e.g., Resend, SendGrid, or NodeMailer/aiosmtplib). Build a semantic markdown layout summary that sends automated alerts out immediately upon submission.
+* **Task 4.2:** Configure an automated email dispatch routine (e.g., NodeMailer). When a photo is present, attach the JPEG and embed an inline preview (`cid:`). Photos are not persisted server-side or in Drive.
+* **Task 4.3:** Integrate Google Sheets updates via service account pathways. Map report fields, timestamps, location numbers, and a **text-only** photo column (`No photo`, `See alert email (<id>)`, etc.) into a new row insertion sequence.
 
 ---
 
@@ -183,5 +183,6 @@ This phase layout maps directly to sequential execution instructions for Google 
 To prevent scope creep and design errors during the autonomous development phase, agents must adhere to the following guardrails:
 
 1. **Authentication Boundary:** To maintain zero-friction access for one-time users, the frontend app has **no user authentication layer**. Data submission paths use rate-limiting controls to prevent spam. Backend access to Google APIs must be securely handled using an isolated Google Cloud Service Account with scoped permissions, rather than a fragile user OAuth token flow.
-2. **Concurrent Request Batches:** If multiple submissions occur offline, the sync engine must process uploads **sequentially** using an array-reduce chain, rather than executing a simultaneous `Promise.all()`. This prevents performance drops on low-bandwidth rural networks and avoids triggering timeout limits on serverless endpoints.
-3. **Map Caching Boundaries:** For the initial MVP, map tile pre-caching is completely skipped. The interface will prioritize clear, text-based coordinate validation to ensure the application bundle remains small, fast, and optimized for field deployment.
+2. **Photo retention:** Evidence images are queued in IndexedDB only until sync. After a successful POST, the server forwards them in the alert email and does **not** write them to disk, Google Drive, or the spreadsheet. Long-term photo access is via the configured `EMAIL_TO` mailbox only.
+3. **Concurrent Request Batches:** If multiple submissions occur offline, the sync engine must process uploads **sequentially** using an array-reduce chain, rather than executing a simultaneous `Promise.all()`. This prevents performance drops on low-bandwidth rural networks and avoids triggering timeout limits on serverless endpoints.
+4. **Map Caching Boundaries:** For the initial MVP, map tile pre-caching is completely skipped. The interface will prioritize clear, text-based coordinate validation to ensure the application bundle remains small, fast, and optimized for field deployment.
