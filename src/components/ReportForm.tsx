@@ -44,6 +44,7 @@ export default function ReportForm() {
     email: '',
     phone: '',
   });
+  const [extraInformation, setExtraInformation] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [isOnline, setIsOnline] = useState(true);
@@ -154,6 +155,7 @@ export default function ReportForm() {
           accuracyMeters: reportLocation.accuracyMeters,
         },
         reporter,
+        extraInformation: extraInformation.trim() || undefined,
         photo: compressedPhoto,
       });
 
@@ -162,6 +164,7 @@ export default function ReportForm() {
         isOnline ? 'Report submitted successfully!' : 'Offline: Report saved locally and will sync when online.'
       );
       setPhoto(null);
+      setExtraInformation('');
 
       if (isOnline) {
         syncPendingReports();
@@ -362,6 +365,26 @@ export default function ReportForm() {
             className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600"
           />
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <label
+          htmlFor="extra-information"
+          className="block text-xs font-bold uppercase tracking-widest text-zinc-500"
+        >
+          Extra Information
+        </label>
+        <textarea
+          id="extra-information"
+          name="extraInformation"
+          rows={5}
+          value={extraInformation}
+          onChange={(e) => setExtraInformation(e.target.value)}
+          placeholder={`- Is the badger roadside, in a field, or in woodland?
+- Is the location rough or exact?
+- Are you certain this is a badger?`}
+          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600 resize-y min-h-[8rem]"
+        />
       </section>
 
       <div className="pt-6 pb-12">

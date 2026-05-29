@@ -6,6 +6,7 @@ export const appendReportToSheet = async (report: {
   location: { latitude: number; longitude: number; accuracyMeters: number };
   suitability: { collectionSuitable: boolean };
   reporter: { name?: string; email?: string; phone?: string };
+  extraInformation?: string;
 }, photoNote: string) => {
   const auth = getGoogleAuth();
   const sheets = google.sheets({ version: 'v4', auth });
@@ -30,13 +31,14 @@ export const appendReportToSheet = async (report: {
         report.reporter.email || 'N/A',
         report.reporter.phone || 'N/A',
         photoNote,
+        report.extraInformation || '',
       ],
     ];
 
     console.log(`[Google Sheets] Appending to sheet: "${sheetName}"`);
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${sheetName}!A:I`,
+      range: `${sheetName}!A:J`,
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
