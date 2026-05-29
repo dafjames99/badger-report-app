@@ -1,10 +1,10 @@
-import { getPendingReports, markReportSynced, deleteReport, Report } from './db';
+import { getPendingReports, deleteReport, Report } from './db';
 
 let isSyncing = false;
 
 export const syncPendingReports = async () => {
   if (isSyncing || !navigator.onLine) return;
-  
+
   const pending = await getPendingReports();
   if (pending.length === 0) return;
 
@@ -14,12 +14,10 @@ export const syncPendingReports = async () => {
   for (const report of pending) {
     try {
       await uploadReport(report);
-      // Delete from IDB after successful upload
       await deleteReport(report.id);
       console.log(`[SyncManager] Successfully synced report: ${report.id}`);
     } catch (error) {
       console.error(`[SyncManager] Failed to sync report ${report.id}:`, error);
-      // Keep in IDB to retry later
     }
   }
 
@@ -29,12 +27,11 @@ export const syncPendingReports = async () => {
 
 async function uploadReport(report: Report) {
   const formData = new FormData();
-  
-  // Clean report object for metadata
+
   const { photo, ...metadata } = report;
   formData.append('metadata', JSON.stringify(metadata));
 
-  if (photo) {
+  if (photo && photo.size > 0) {
     formData.append('photo', photo, `report-${report.id}.jpg`);
   }
 

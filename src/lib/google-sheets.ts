@@ -1,7 +1,12 @@
 import { google } from 'googleapis';
 import { getGoogleAuth } from './google-auth';
 
-export const appendReportToSheet = async (report: any, driveLink: string) => {
+export const appendReportToSheet = async (report: {
+  timestamp: number;
+  location: { latitude: number; longitude: number; accuracyMeters: number };
+  suitability: { collectionSuitable: boolean };
+  reporter: { name?: string; email?: string; phone?: string };
+}, photoNote: string) => {
   const auth = getGoogleAuth();
   const sheets = google.sheets({ version: 'v4', auth });
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
@@ -11,7 +16,6 @@ export const appendReportToSheet = async (report: any, driveLink: string) => {
   }
 
   try {
-    // 1. Get spreadsheet metadata to find the first sheet name
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
     const sheetName = spreadsheet.data.sheets?.[0]?.properties?.title || 'Sheet1';
 
@@ -25,7 +29,7 @@ export const appendReportToSheet = async (report: any, driveLink: string) => {
         report.reporter.name || 'Anonymous',
         report.reporter.email || 'N/A',
         report.reporter.phone || 'N/A',
-        driveLink,
+        photoNote,
       ],
     ];
 
@@ -38,8 +42,9 @@ export const appendReportToSheet = async (report: any, driveLink: string) => {
         values,
       },
     });
-  } catch (error: any) {
-    console.error('[Google Sheets Error]:', error.message);
-    throw new Error(`Failed to update Google Sheet: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[Google Sheets Error]:', message);
+    throw new Error(`Failed to update Google Sheet: ${message}`);
   }
 };
