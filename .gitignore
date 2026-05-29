@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Google Service Account Key (never commit this)
+service-account.json
+
+# Local tooling
+.antigravitycli/
