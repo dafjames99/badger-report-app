@@ -16,8 +16,12 @@ const icon = L.icon({
   shadowSize: [41, 41],
 });
 
-const UK_CENTER: L.LatLngExpression = [52.5, -1.5];
-const DEFAULT_ZOOM = 6;
+/** Geographic centre of Wales — default when device location is unavailable */
+const WALES_CENTER: L.LatLngExpression = [52.25, -3.75];
+/** Fits all of Wales in view */
+const WALES_ZOOM = 8;
+/** When we have the user's approximate position */
+const DEVICE_LOCATION_ZOOM = 13;
 const SELECTED_ZOOM = 15;
 
 export interface MapPosition {
@@ -59,7 +63,9 @@ function MapViewController({
       return;
     }
     if (initialCenter) {
-      map.setView([initialCenter.latitude, initialCenter.longitude], DEFAULT_ZOOM, { animate: false });
+      map.setView([initialCenter.latitude, initialCenter.longitude], DEVICE_LOCATION_ZOOM, {
+        animate: false,
+      });
     }
   }, [map, position, initialCenter]);
 
@@ -75,9 +81,9 @@ export default function LocationMapPicker({
     ? [position.latitude, position.longitude]
     : initialCenter
       ? [initialCenter.latitude, initialCenter.longitude]
-      : UK_CENTER;
+      : WALES_CENTER;
 
-  const zoom = position ? SELECTED_ZOOM : initialCenter ? 10 : DEFAULT_ZOOM;
+  const zoom = position ? SELECTED_ZOOM : initialCenter ? DEVICE_LOCATION_ZOOM : WALES_ZOOM;
 
   return (
     <div className="space-y-2">
