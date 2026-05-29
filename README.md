@@ -52,6 +52,25 @@ npm run dev -- --webpack
 ```
 
 ### 6. Production Build
+#### Desktop
 ```bash
-npm run build -- --webpack
+npm run pwa:build
+npm run start
 ```
+
+#### Mobile
+**Note**: running the localhost (`http://192.168...` etc.) on mobile *won't* be seen as secure, and therefore won't have a working "use current location" feature. 
+
+To fix this, run (in a separate terminals):
+
+```bash
+npm run start
+```
+
+and
+
+```bash
+ngrok http 3000
+```
+
+This will return a forwarded address that one can use to test the web-app on mobile.
