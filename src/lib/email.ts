@@ -2,6 +2,15 @@ import nodemailer from 'nodemailer';
 
 const EVIDENCE_CID = 'evidence-photo';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export interface ReportPhoto {
   buffer: Buffer;
   filename: string;
@@ -20,6 +29,7 @@ export const sendReportEmail = async (
     location: { latitude: number; longitude: number; accuracyMeters: number };
     suitability: { collectionSuitable: boolean };
     reporter: { name?: string; email?: string; phone?: string };
+    extraInformation?: string;
   },
   photo?: ReportPhoto
 ): Promise<EmailResult> => {
@@ -54,6 +64,7 @@ export const sendReportEmail = async (
     <p><strong>Location:</strong> ${report.location.latitude}, ${report.location.longitude} (±${report.location.accuracyMeters}m)</p>
     <p><strong>Suitable for Collection:</strong> ${report.suitability.collectionSuitable ? 'Yes' : 'No'}</p>
     <p><strong>Reporter:</strong> ${report.reporter.name || 'Anonymous'} (${report.reporter.email || 'N/A'})</p>
+    <p><strong>Extra information:</strong> ${report.extraInformation?.trim() ? escapeHtml(report.extraInformation.trim()).replace(/\n/g, '<br />') : 'None provided.'}</p>
     ${photoSection}
   `;
 

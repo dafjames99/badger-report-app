@@ -17,6 +17,7 @@ export interface Report {
     email?: string;
     phone?: string;
   };
+  extraInformation?: string;
   photo?: Blob;
   syncStatus: 'pending' | 'synced' | 'failed';
 }
