@@ -207,22 +207,20 @@ export default function ReportForm() {
           <button
             type="button"
             onClick={selectGpsMode}
-            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${
-              locationMode === 'gps'
-                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/30'
-                : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
-            }`}
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${locationMode === 'gps'
+              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/30'
+              : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              }`}
           >
             Use current location
           </button>
           <button
             type="button"
             onClick={selectMapMode}
-            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${
-              locationMode === 'map'
-                ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/30'
-                : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
-            }`}
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${locationMode === 'map'
+              ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/30'
+              : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              }`}
           >
             Select on map
           </button>
@@ -325,20 +323,21 @@ export default function ReportForm() {
         <button
           type="button"
           onClick={() => setCollectionSuitable(!collectionSuitable)}
-          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black ${
-            collectionSuitable ? 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-zinc-700'
-          }`}
+          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black ${collectionSuitable ? 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-zinc-700'
+            }`}
         >
           <span
-            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
-              collectionSuitable ? 'translate-x-6' : 'translate-x-1'
-            }`}
+            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${collectionSuitable ? 'translate-x-6' : 'translate-x-1'
+              }`}
           />
         </button>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Reporter Details</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+          Reporter Details
+          <span className="ml-2 text-xs font-medium text-zinc-500 opacity-70">(optional)</span>
+        </h2>
         <div className="grid gap-3">
           <input
             type="text"
@@ -373,6 +372,7 @@ export default function ReportForm() {
           className="block text-xs font-bold uppercase tracking-widest text-zinc-500"
         >
           Extra Information
+          <span className="ml-2 text-xs font-medium text-zinc-500 opacity-70">(optional)</span>
         </label>
         <textarea
           id="extra-information"
@@ -415,11 +415,10 @@ export default function ReportForm() {
 
         {message && (
           <div
-            className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-in fade-in slide-in-from-top-2 ${
-              status === 'success'
+            className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-in fade-in slide-in-from-top-2 ${status === 'success'
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 : 'bg-red-500/10 text-red-400 border border-red-500/20'
-            }`}
+              }`}
           >
             {message}
           </div>
