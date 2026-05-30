@@ -11,7 +11,7 @@ import type { MapPosition } from '@/components/LocationMapPicker';
 const LocationMapPicker = dynamic(() => import('@/components/LocationMapPicker'), {
   ssr: false,
   loading: () => (
-    <div className="h-64 w-full rounded-xl border border-zinc-700 bg-zinc-900/50 flex items-center justify-center text-zinc-500 text-sm">
+    <div className="h-64 w-full rounded-xl border border-border-base bg-surface-card flex items-center justify-center text-text-placeholder text-sm">
       Loading map…
     </div>
   ),
@@ -179,27 +179,27 @@ export default function ReportForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-lg mx-auto p-6 space-y-8 bg-black text-white min-h-screen selection:bg-blue-500/30"
+      className="max-w-lg mx-auto p-6 space-y-8 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
     >
       <header className="space-y-2 pt-4">
-        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent animate-gradient-x">
+        <h1 className="text-4xl font-surface-bg tracking-tight bg-gradient-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
           WVSC Badger Report
         </h1>
-        <p className="text-zinc-400 text-sm font-medium">
+        <p className="text-text-description text-sm font-medium">
           If you find a dead badger, report it to us using the form below. Please include as much information as
           possible.
         </p>
       </header>
 
       {!isOnline && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold animate-pulse">
-          <span className="h-2 w-2 rounded-full bg-amber-500" />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-status-offline-bg border border-status-offline-border text-status-offline text-xs font-semibold animate-pulse">
+          <span className="h-2 w-2 rounded-full bg-status-offline" />
           OFFLINE MODE: Reports will be saved locally
         </div>
       )}
 
-      <section className="p-5 rounded-2xl glass-blue group space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 group-hover:text-blue-400 transition-colors">
+      <section className="p-5 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-4 transition-all">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
           Report location
         </h2>
 
@@ -208,8 +208,8 @@ export default function ReportForm() {
             type="button"
             onClick={selectGpsMode}
             className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${locationMode === 'gps'
-              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/30'
-              : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              ? 'bg-action-primary border-action-hover text-text-enabled shadow-lg shadow-action-glow'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             Use current location
@@ -218,8 +218,8 @@ export default function ReportForm() {
             type="button"
             onClick={selectMapMode}
             className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${locationMode === 'map'
-              ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/30'
-              : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              ? 'bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             Select on map
@@ -229,20 +229,20 @@ export default function ReportForm() {
         {locationMode === 'gps' && (
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">GPS</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-text-placeholder">GPS</span>
               <div className="flex items-center gap-2">
                 {geoLoading && (
                   <div className="flex gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-start animate-bounce [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-start animate-bounce [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-start animate-bounce" />
                   </div>
                 )}
                 <button
                   type="button"
                   onClick={retryGeo}
                   disabled={geoLoading}
-                  className="text-[10px] font-black uppercase tracking-tighter px-2 py-1 bg-zinc-800 hover:bg-zinc-700 rounded border border-zinc-700 transition-colors active:scale-95 disabled:opacity-50"
+                  className="text-[10px] font-surface-bg uppercase tracking-tighter px-2 py-1 bg-surface-element hover:bg-surface-element-hover rounded border border-border-base transition-colors active:scale-95 disabled:opacity-50"
                 >
                   Refresh
                 </button>
@@ -250,11 +250,11 @@ export default function ReportForm() {
             </div>
             {geoError ? (
               <div className="space-y-3">
-                <p className="text-red-400 text-sm leading-relaxed">{geoError}</p>
+                <p className="text-status-error text-sm leading-relaxed">{geoError}</p>
                 <button
                   type="button"
                   onClick={retryGeo}
-                  className="text-xs font-bold px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-all active:scale-95 border border-zinc-700"
+                  className="text-xs font-bold px-4 py-2 bg-surface-element hover:bg-surface-element-hover rounded-full transition-all active:scale-95 border border-border-base"
                 >
                   Retry GPS
                 </button>
@@ -262,7 +262,7 @@ export default function ReportForm() {
             ) : reportLocation?.source === 'gps' ? (
               <LocationSummary location={reportLocation} />
             ) : !geoLoading ? (
-              <p className="text-zinc-500 text-sm">Waiting for GPS fix…</p>
+              <p className="text-text-placeholder text-sm">Waiting for GPS fix…</p>
             ) : null}
           </div>
         )}
@@ -277,19 +277,19 @@ export default function ReportForm() {
             {reportLocation?.source === 'map' ? (
               <LocationSummary location={reportLocation} />
             ) : (
-              <p className="text-zinc-500 text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
+              <p className="text-text-placeholder text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
             )}
           </div>
         )}
 
         {locationMode === null && (
-          <p className="text-zinc-500 text-sm">Choose how to set the report location.</p>
+          <p className="text-text-placeholder text-sm">Choose how to set the report location.</p>
         )}
       </section>
 
       <section className="space-y-3">
-        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500">Evidence Photo</label>
-        <div className="relative group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/30 transition-all hover:border-blue-500/50">
+        <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">Evidence Photo</label>
+        <div className="relative group overflow-hidden rounded-2xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
           <input
             type="file"
             accept="image/*"
@@ -298,7 +298,7 @@ export default function ReportForm() {
             className="absolute inset-0 opacity-0 z-10 cursor-pointer"
           />
           <div className="p-8 text-center space-y-2">
-            <div className="mx-auto w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-900/50 group-hover:text-blue-400 transition-colors">
+            <div className="mx-auto w-10 h-10 rounded-full bg-surface-element flex items-center justify-center group-hover:bg-action-hover/50 group-hover:text-brand-start transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
@@ -307,36 +307,36 @@ export default function ReportForm() {
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-zinc-400">{photo ? photo.name : 'Tap to capture photo'}</p>
+            <p className="text-sm font-medium text-text-description">{photo ? photo.name : 'Tap to capture photo'}</p>
           </div>
           {photo && (
-            <div className="h-1 bg-blue-500 w-full animate-shimmer bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-500 bg-[length:200%_100%]" />
+            <div className="h-1 bg-action-hover w-full animate-shimmer bg-gradient-to-r from-action-hover via-success-hover to-action-primary bg-[length:200%_100%]" />
           )}
         </div>
       </section>
 
-      <section className="flex items-center justify-between p-5 rounded-2xl glass transition-all hover:bg-zinc-900/60">
+      <section className="flex items-center justify-between p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover">
         <div>
-          <h3 className="font-bold text-zinc-200">Intact Carcass?</h3>
-          <p className="text-xs text-zinc-500 font-medium">Suitable for scientific collection</p>
+          <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
+          <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
         </div>
         <button
           type="button"
           onClick={() => setCollectionSuitable(!collectionSuitable)}
-          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black ${collectionSuitable ? 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-zinc-700'
+          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-action-hover focus:ring-offset-2 focus:ring-offset-surface-bg ${collectionSuitable ? 'bg-success-primary shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-button-disabled'
             }`}
         >
           <span
-            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${collectionSuitable ? 'translate-x-6' : 'translate-x-1'
+            className={`inline-block h-5 w-5 transform rounded-full bg-text-base shadow-sm transition-transform duration-300 ${collectionSuitable ? 'translate-x-6' : 'translate-x-1'
               }`}
           />
         </button>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder">
           Reporter Details
-          <span className="ml-2 text-xs font-medium text-zinc-500 opacity-70">(optional)</span>
+          <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
         </h2>
         <div className="grid gap-3">
           <input
@@ -345,7 +345,7 @@ export default function ReportForm() {
             placeholder="Your Name"
             value={reporter.name}
             onChange={handleReporterChange}
-            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600"
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="email"
@@ -353,7 +353,7 @@ export default function ReportForm() {
             placeholder="Email Address"
             value={reporter.email}
             onChange={handleReporterChange}
-            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600"
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="tel"
@@ -361,7 +361,7 @@ export default function ReportForm() {
             placeholder="Phone Number"
             value={reporter.phone}
             onChange={handleReporterChange}
-            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600"
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
         </div>
       </section>
@@ -369,10 +369,10 @@ export default function ReportForm() {
       <section className="space-y-3">
         <label
           htmlFor="extra-information"
-          className="block text-xs font-bold uppercase tracking-widest text-zinc-500"
+          className="block text-xs font-bold uppercase tracking-widest text-text-placeholder"
         >
           Extra Information
-          <span className="ml-2 text-xs font-medium text-zinc-500 opacity-70">(optional)</span>
+          <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
         </label>
         <textarea
           id="extra-information"
@@ -383,7 +383,7 @@ export default function ReportForm() {
           placeholder={`- Is the badger roadside, in a field, or in woodland?
 - Is the location rough or exact?
 - Are you certain this is a badger?`}
-          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600 resize-y min-h-[8rem]"
+          className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-[8rem]"
         />
       </section>
 
@@ -391,7 +391,7 @@ export default function ReportForm() {
         <button
           type="submit"
           disabled={status === 'submitting' || !reportLocation}
-          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-blue-600 font-black text-sm uppercase tracking-widest text-white shadow-2xl shadow-blue-900/40 active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100"
+          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-action-primary font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
         >
           <span className="relative z-10">
             {status === 'submitting' ? (
@@ -410,14 +410,14 @@ export default function ReportForm() {
               'Dispatch Report'
             )}
           </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-success-primary to-success-hover via-brand-end opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>
 
         {message && (
           <div
             className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-in fade-in slide-in-from-top-2 ${status === 'success'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                ? 'bg-sucess-bg text-brand-end border border-sucess-border'
+                : 'bg-status-error-bg text-status-error border border-status-error-border'
               }`}
           >
             {message}
@@ -435,11 +435,11 @@ function LocationSummary({ location }: { location: ReportLocation }) {
 
   return (
     <div className="space-y-1">
-      <p className="text-lg font-mono text-emerald-400 flex items-baseline gap-1">
+      <p className="text-lg font-mono text-brand-end flex items-baseline gap-1">
         {location.latitude.toFixed(6)}
-        <span className="text-zinc-600 text-xs">,</span> {location.longitude.toFixed(6)}
+        <span className="text-text-disabled text-xs">,</span> {location.longitude.toFixed(6)}
       </p>
-      <p className="text-zinc-500 text-xs font-medium">
+      <p className="text-text-placeholder text-xs font-medium">
         {sourceLabel} · Accuracy {accuracyNote}
       </p>
     </div>

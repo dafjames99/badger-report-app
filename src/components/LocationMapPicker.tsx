@@ -87,8 +87,8 @@ export default function LocationMapPicker({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-zinc-500 font-medium">Tap the map to place the report pin.</p>
-      <div className="h-64 w-full rounded-xl overflow-hidden border border-zinc-700 z-0 [&_.leaflet-container]:h-full [&_.leaflet-container]:w-full [&_.leaflet-container]:bg-zinc-900">
+      <p className="text-xs text-text-placeholder font-medium">Tap the map to place the report pin.</p>
+      <div className="h-64 w-full rounded-xl overflow-hidden border border-border-base z-0 [&_.leaflet-container]:h-full [&_.leaflet-container]:w-full [&_.leaflet-container]:bg-surface-bg">
         <MapContainer center={center} zoom={zoom} scrollWheelZoom className="h-full w-full">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
