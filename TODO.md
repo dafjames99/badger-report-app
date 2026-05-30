@@ -25,3 +25,4 @@
     - *"Submit a new report when you come across a badger"*
     - *"please only badgers"*
     - *"only wales"*
+- [ ] **Validate location for wales-only(?)**
