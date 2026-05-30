@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pwa:dev": "next dev --webpack",
-    "pwa:build": "next build --webpack"
+    "pwa:dev": "next dev",
+    "pwa:build": "next build"
   },
   "dependencies": {
     "@serwist/next": "^9.5.11",
