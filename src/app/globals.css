@@ -8,6 +8,7 @@
 --color-brand-start: #0f4c3a;
 --color-brand-mid: #1b5e4b;
 --color-brand-end: #8b2635;
+--color-brand-end-dark: rgb(117, 26, 26);
 
 --color-action-primary: #1b5e4b;
 --color-action-hover: #237a62;
@@ -17,7 +18,7 @@
 --color-success-primary: #15803d;
 --color-success-hover: #16a34a;      
 --color-success-glow: rgba(21, 128, 61, 0.1); 
---color-success-bg: #f0fdf4;
+--color-success-bg: rgba(54, 167, 17, 0.3);
 --color-success-border: #bbf7d0;     
 
 --color-status-offline: #b45309;
@@ -25,7 +26,7 @@
 --color-status-offline-border: #fde68a; 
 
 --color-status-error: #b91c1c;
---color-status-error-bg: #fef2f2;
+--color-status-error-bg: rgba(138, 35, 35, 0.3);
 --color-status-error-border: #fca5a5;  
 
 --color-text-base: #0f172a;

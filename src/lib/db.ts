@@ -5,7 +5,7 @@ export interface Report {
   id: string;
   timestamp: number;
   suitability: {
-    collectionSuitable: boolean;
+    collectionSuitable: boolean | null;
   };
   location: {
     latitude: number;

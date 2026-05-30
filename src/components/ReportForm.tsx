@@ -38,7 +38,7 @@ export default function ReportForm() {
   const [mapInitialCenter, setMapInitialCenter] = useState<MapPosition | undefined>(undefined);
 
   const [photo, setPhoto] = useState<File | null>(null);
-  const [collectionSuitable, setCollectionSuitable] = useState(true);
+  const [collectionSuitable, setCollectionSuitable] = useState<boolean | null>(null);
   const [reporter, setReporter] = useState({
     name: '',
     email: '',
@@ -132,10 +132,16 @@ export default function ReportForm() {
     localStorage.setItem('reporter-info', JSON.stringify(updated));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    
     e.preventDefault();
+    
     if (!reportLocation) {
       setMessage('Location required to submit report.');
+      return;
+    }
+    if (collectionSuitable === null) {
+      setMessage('CollectionSuitability must be yes/no to submit report.');
       return;
     }
 
@@ -185,11 +191,16 @@ export default function ReportForm() {
         <h1 className="text-4xl font-surface-bg tracking-tight bg-gradient-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
           WVSC Badger Report
         </h1>
-        <p className="text-text-description text-sm font-medium">
-          If you find a dead badger, report it to us using the form below. Please include as much information as
-          possible.
-        </p>
       </header>
+
+      <div className="flex flex-col">
+        <span className="text-text-description text-sm font-medium">
+          If you find a dead badger, report it to us using the form below.
+        </span>
+        <span className="text-text-description text-sm font-medium">
+          Please include as much information as possible.
+        </span>
+      </div>
 
       {!isOnline && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-status-offline-bg border border-status-offline-border text-status-offline text-xs font-semibold animate-pulse">
@@ -287,8 +298,44 @@ export default function ReportForm() {
         )}
       </section>
 
+      <section className="flex items-center justify-between p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover">
+        <div>
+          <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
+          <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
+        </div>
+        
+        {/* Yes/No Button Group */}
+        <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted">
+          <button
+            type="button"
+            onClick={() => setCollectionSuitable(true)}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
+              collectionSuitable === true
+                ? 'bg-success-primary text-white shadow-sm'
+                : 'text-text-muted hover:bg-surface-element-hover'
+            }`}
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollectionSuitable(false)}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
+              collectionSuitable === false
+                ? 'bg-brand-end text-white shadow-sm' // Replace with your theme's "No/Danger/Neutral" color if needed
+                : 'text-text-muted hover:bg-surface-element-hover'
+            }`}
+          >
+            No
+          </button>
+        </div>
+      </section>
+
       <section className="space-y-3">
-        <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">Evidence Photo</label>
+        <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">
+          Evidence Photo
+          <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
+          </label>
         <div className="relative group overflow-hidden rounded-2xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
           <input
             type="file"
@@ -315,23 +362,6 @@ export default function ReportForm() {
         </div>
       </section>
 
-      <section className="flex items-center justify-between p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover">
-        <div>
-          <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
-          <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCollectionSuitable(!collectionSuitable)}
-          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-action-hover focus:ring-offset-2 focus:ring-offset-surface-bg ${collectionSuitable ? 'bg-success-primary shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-button-disabled'
-            }`}
-        >
-          <span
-            className={`inline-block h-5 w-5 transform rounded-full bg-text-base shadow-sm transition-transform duration-300 ${collectionSuitable ? 'translate-x-6' : 'translate-x-1'
-              }`}
-          />
-        </button>
-      </section>
 
       <section className="space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder">
@@ -390,8 +420,8 @@ export default function ReportForm() {
       <div className="pt-6 pb-12">
         <button
           type="submit"
-          disabled={status === 'submitting' || !reportLocation}
-          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-action-primary font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
+          disabled={status === 'submitting' || !reportLocation || collectionSuitable === null}
+          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-success-primary hover:bg-success-hover disabled:bg-brand-end font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
         >
           <span className="relative z-10">
             {status === 'submitting' ? (
@@ -410,13 +440,13 @@ export default function ReportForm() {
               'Dispatch Report'
             )}
           </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-success-primary to-success-hover via-brand-end opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* <div className="absolute inset-0 bg-brand-end opacity-0 group-hover:opacity-100 transition-opacity" /> */}
         </button>
 
         {message && (
           <div
             className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-in fade-in slide-in-from-top-2 ${status === 'success'
-                ? 'bg-sucess-bg text-brand-end border border-sucess-border'
+                ? 'bg-success-bg text-brand-start border border-sucess-border'
                 : 'bg-status-error-bg text-status-error border border-status-error-border'
               }`}
           >
