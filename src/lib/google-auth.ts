@@ -10,7 +10,7 @@ export const getGoogleAuth = () => {
 
   if (credentialsEnv) {
     return new google.auth.GoogleAuth({
-      keyFile: JSON.parse(credentialsEnv),
+      credentials: JSON.parse(credentialsEnv),
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     })
   }
