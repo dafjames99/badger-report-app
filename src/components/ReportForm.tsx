@@ -1,5 +1,6 @@
 'use client';
 
+import { DBDebugPanel } from "@/components/DebugPanel";
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -454,6 +455,7 @@ export default function ReportForm() {
           </div>
         )}
       </div>
+      <DBDebugPanel />
     </form>
   );
 }
