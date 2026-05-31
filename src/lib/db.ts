@@ -35,7 +35,7 @@ interface BadgerDB extends DBSchema {
 
 let dbPromise: Promise<IDBPDatabase<BadgerDB>> | null = null;
 
-const getDB = () => {
+export const getDB = () => {
   if (typeof window === 'undefined') return null;
   if (!dbPromise) {
     dbPromise = openDB<BadgerDB>('badger-reports', 1, {
@@ -78,7 +78,6 @@ export const resetStuckSyncingReports = async (olderThanMs = 60_000) => {
     }
   }
 };
-
 export const saveReport = async (reportData: Omit<Report, 'id' | 'syncStatus'> & { id?: string }) => {
   const db = await getDB();
   if (!db) throw new Error('IndexedDB not available');
@@ -89,6 +88,13 @@ export const saveReport = async (reportData: Omit<Report, 'id' | 'syncStatus'> &
     syncStatus: 'pending',
   };
 
+  // Check if we're overwriting something
+  const existing = await db.get('reports', report.id);
+  if (existing) {
+    console.warn(`[DB] saveReport is overwriting existing record:`, existing);
+  }
+
+  console.log(`[DB] Saving report ${report.id} with status pending`);
   await db.put('reports', report);
   return report.id;
 };

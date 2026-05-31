@@ -4,43 +4,58 @@ import {
   markReportSyncing,
   resetStuckSyncingReports,
   Report,
-  markReportPending
+  markReportPending,
+  getDB
 } from './db';
 
 let isSyncing = false;
 
+// syncManager.ts
 export const syncPendingReports = async () => {
   if (isSyncing || !navigator.onLine) return;
   isSyncing = true;
 
   try {
-    // Reset any reports stuck in 'syncing' from a previous crashed session
     await resetStuckSyncingReports();
 
     const pending = await getPendingReports();
+    console.log(`[SyncManager] Pending reports (${pending.length}):`,
+      pending.map(r => ({ id: r.id, timestamp: r.timestamp, status: r.syncStatus }))
+    );
+
     if (pending.length === 0) return;
 
-    console.log(`[SyncManager] Syncing ${pending.length} reports…`);
-
     for (const report of pending) {
-      // Atomically claim the report — skip if another sync beat us to it
       const claimed = await markReportSyncing(report.id);
-      if (!claimed) {
-        console.log(`[SyncManager] Skipping ${report.id} — already claimed`);
-        continue;
-      }
+      console.log(`[SyncManager] Claim attempt for ${report.id}:`, claimed);
+      if (!claimed) continue;
 
       try {
+        console.log(`[SyncManager] Uploading ${report.id}…`);
         await uploadReport(report);
+        console.log(`[SyncManager] Upload succeeded for ${report.id}, deleting…`);
         await deleteReport(report.id);
-        console.log(`[SyncManager] Synced: ${report.id}`);
+
+        // Verify deletion
+        const db = await getDB();
+        const stillExists = db ? await db.get('reports', report.id) : 'could not check';
+        console.log(`[SyncManager] Post-delete check for ${report.id}:`, stillExists ?? 'GONE ✓');
+
       } catch (error) {
-        console.error(`[SyncManager] Failed: ${report.id}`, error);
-        await markReportPending(report.id); // immediate reset of failed ones
+        console.error(`[SyncManager] Failed ${report.id}:`, error);
+        await markReportPending(report.id);
       }
     }
   } finally {
     isSyncing = false;
+    // Log final state of DB
+    const db = await getDB();
+    if (db) {
+      const remaining = await db.getAll('reports');
+      console.log(`[SyncManager] DB state after sync:`,
+        remaining.map(r => ({ id: r.id, timestamp: r.timestamp, status: r.syncStatus }))
+      );
+    }
   }
 };
 
