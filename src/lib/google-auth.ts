@@ -7,10 +7,13 @@ export const getGoogleAuth = () => {
 
   const keyFilePath = path.join(process.cwd(), 'service-account.json');
   const credentialsEnv = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-
   if (credentialsEnv) {
+    const credentials = JSON.parse(credentialsEnv);
+    if (credentials.private_key) {
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    }
     return new google.auth.GoogleAuth({
-      credentials: JSON.parse(credentialsEnv),
+      credentials,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     })
   }
