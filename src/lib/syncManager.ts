@@ -1,28 +1,62 @@
-import { getPendingReports, deleteReport, Report } from './db';
+import {
+  getPendingReports,
+  deleteReport,
+  markReportSyncing,
+  resetStuckSyncingReports,
+  Report,
+  markReportPending,
+  getDB
+} from './db';
 
 let isSyncing = false;
 
+// syncManager.ts
 export const syncPendingReports = async () => {
   if (isSyncing || !navigator.onLine) return;
-
-  const pending = await getPendingReports();
-  if (pending.length === 0) return;
-
   isSyncing = true;
-  console.log(`[SyncManager] Starting sync for ${pending.length} reports...`);
 
-  for (const report of pending) {
-    try {
-      await uploadReport(report);
-      await deleteReport(report.id);
-      console.log(`[SyncManager] Successfully synced report: ${report.id}`);
-    } catch (error) {
-      console.error(`[SyncManager] Failed to sync report ${report.id}:`, error);
+  try {
+    await resetStuckSyncingReports();
+
+    const pending = await getPendingReports();
+    console.log(`[SyncManager] Pending reports (${pending.length}):`,
+      pending.map(r => ({ id: r.id, timestamp: r.timestamp, status: r.syncStatus }))
+    );
+
+    if (pending.length === 0) return;
+
+    for (const report of pending) {
+      const claimed = await markReportSyncing(report.id);
+      console.log(`[SyncManager] Claim attempt for ${report.id}:`, claimed);
+      if (!claimed) continue;
+
+      try {
+        console.log(`[SyncManager] Uploading ${report.id}…`);
+        await uploadReport(report);
+        console.log(`[SyncManager] Upload succeeded for ${report.id}, deleting…`);
+        await deleteReport(report.id);
+
+        // Verify deletion
+        const db = await getDB();
+        const stillExists = db ? await db.get('reports', report.id) : 'could not check';
+        console.log(`[SyncManager] Post-delete check for ${report.id}:`, stillExists ?? 'GONE ✓');
+
+      } catch (error) {
+        console.error(`[SyncManager] Failed ${report.id}:`, error);
+        await markReportPending(report.id);
+      }
+    }
+  } finally {
+    isSyncing = false;
+    // Log final state of DB
+    const db = await getDB();
+    if (db) {
+      const remaining = await db.getAll('reports');
+      console.log(`[SyncManager] DB state after sync:`,
+        remaining.map(r => ({ id: r.id, timestamp: r.timestamp, status: r.syncStatus }))
+      );
     }
   }
-
-  isSyncing = false;
-  console.log('[SyncManager] Sync cycle complete.');
 };
 
 async function uploadReport(report: Report) {
@@ -46,3 +80,10 @@ async function uploadReport(report: Report) {
 
   return response.json();
 }
+
+let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+export const debouncedSync = () => {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(syncPendingReports, 2000);
+};

@@ -1,11 +1,12 @@
 'use client';
 
+import { DBDebugPanel } from "@/components/DebugPanel";
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { compressImage } from '@/lib/image-utils';
 import { saveReport } from '@/lib/db';
-import { syncPendingReports } from '@/lib/syncManager';
+import { debouncedSync } from '@/lib/syncManager';
 import type { MapPosition } from '@/components/LocationMapPicker';
 
 const LocationMapPicker = dynamic(() => import('@/components/LocationMapPicker'), {
@@ -59,11 +60,11 @@ export default function ReportForm() {
       setReporter(JSON.parse(saved));
     }
 
-    syncPendingReports();
+    debouncedSync();
 
     const handleOnline = () => {
       setIsOnline(true);
-      syncPendingReports();
+      debouncedSync();
     };
     const handleOffline = () => setIsOnline(false);
 
@@ -133,9 +134,9 @@ export default function ReportForm() {
   };
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
-    
+
     e.preventDefault();
-    
+
     if (!reportLocation) {
       setMessage('Location required to submit report.');
       return;
@@ -151,9 +152,11 @@ export default function ReportForm() {
       if (photo) {
         compressedPhoto = await compressImage(photo);
       }
+      const now = Date.now()
 
       await saveReport({
-        timestamp: Date.now(),
+        timestamp: now,
+        updatedAt: now,
         suitability: { collectionSuitable },
         location: {
           latitude: reportLocation.latitude,
@@ -173,7 +176,7 @@ export default function ReportForm() {
       setExtraInformation('');
 
       if (isOnline) {
-        syncPendingReports();
+        debouncedSync();
       }
     } catch (err) {
       console.error(err);
@@ -188,7 +191,7 @@ export default function ReportForm() {
       className="max-w-lg mx-auto p-6 space-y-8 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
     >
       <header className="space-y-2 pt-4">
-        <h1 className="text-4xl font-surface-bg tracking-tight bg-gradient-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
+        <h1 className="text-4xl font-surface-bg tracking-tight bg-linear-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
           WVSC Badger Report
         </h1>
       </header>
@@ -303,28 +306,26 @@ export default function ReportForm() {
           <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
           <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
         </div>
-        
+
         {/* Yes/No Button Group */}
         <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted">
           <button
             type="button"
             onClick={() => setCollectionSuitable(true)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-              collectionSuitable === true
-                ? 'bg-success-primary text-white shadow-sm'
-                : 'text-text-muted hover:bg-surface-element-hover'
-            }`}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === true
+              ? 'bg-success-primary text-white shadow-sm'
+              : 'text-text-muted hover:bg-surface-element-hover'
+              }`}
           >
             Yes
           </button>
           <button
             type="button"
             onClick={() => setCollectionSuitable(false)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-              collectionSuitable === false
-                ? 'bg-brand-end text-white shadow-sm' // Replace with your theme's "No/Danger/Neutral" color if needed
-                : 'text-text-muted hover:bg-surface-element-hover'
-            }`}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === false
+              ? 'bg-brand-end text-white shadow-sm' // Replace with your theme's "No/Danger/Neutral" color if needed
+              : 'text-text-muted hover:bg-surface-element-hover'
+              }`}
           >
             No
           </button>
@@ -335,7 +336,7 @@ export default function ReportForm() {
         <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">
           Evidence Photo
           <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
-          </label>
+        </label>
         <div className="relative group overflow-hidden rounded-2xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
           <input
             type="file"
@@ -357,7 +358,7 @@ export default function ReportForm() {
             <p className="text-sm font-medium text-text-description">{photo ? photo.name : 'Tap to capture photo'}</p>
           </div>
           {photo && (
-            <div className="h-1 bg-action-hover w-full animate-shimmer bg-gradient-to-r from-action-hover via-success-hover to-action-primary bg-[length:200%_100%]" />
+            <div className="h-1 bg-action-hover w-full animate-shimmer bg-linear-to-r from-action-hover via-success-hover to-action-primary bg-size-200%_100%" />
           )}
         </div>
       </section>
@@ -413,7 +414,7 @@ export default function ReportForm() {
           placeholder={`- Is the badger roadside, in a field, or in woodland?
 - Is the location rough or exact?
 - Are you certain this is a badger?`}
-          className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-[8rem]"
+          className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-32"
         />
       </section>
 
@@ -446,14 +447,15 @@ export default function ReportForm() {
         {message && (
           <div
             className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-in fade-in slide-in-from-top-2 ${status === 'success'
-                ? 'bg-success-bg text-brand-start border border-sucess-border'
-                : 'bg-status-error-bg text-status-error border border-status-error-border'
+              ? 'bg-success-bg text-brand-start border border-sucess-border'
+              : 'bg-status-error-bg text-status-error border border-status-error-border'
               }`}
           >
             {message}
           </div>
         )}
       </div>
+      {/* <DBDebugPanel /> */}
     </form>
   );
 }
