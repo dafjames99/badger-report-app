@@ -455,7 +455,7 @@ export default function ReportForm() {
           </div>
         )}
       </div>
-      <DBDebugPanel />
+      {/* <DBDebugPanel /> */}
     </form>
   );
 }
