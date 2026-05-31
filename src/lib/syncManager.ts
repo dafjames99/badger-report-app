@@ -1,28 +1,47 @@
-import { getPendingReports, deleteReport, Report } from './db';
+import {
+  getPendingReports,
+  deleteReport,
+  markReportSyncing,
+  resetStuckSyncingReports,
+  Report,
+  markReportPending
+} from './db';
 
 let isSyncing = false;
 
 export const syncPendingReports = async () => {
   if (isSyncing || !navigator.onLine) return;
-
-  const pending = await getPendingReports();
-  if (pending.length === 0) return;
-
   isSyncing = true;
-  console.log(`[SyncManager] Starting sync for ${pending.length} reports...`);
 
-  for (const report of pending) {
-    try {
-      await uploadReport(report);
-      await deleteReport(report.id);
-      console.log(`[SyncManager] Successfully synced report: ${report.id}`);
-    } catch (error) {
-      console.error(`[SyncManager] Failed to sync report ${report.id}:`, error);
+  try {
+    // Reset any reports stuck in 'syncing' from a previous crashed session
+    await resetStuckSyncingReports();
+
+    const pending = await getPendingReports();
+    if (pending.length === 0) return;
+
+    console.log(`[SyncManager] Syncing ${pending.length} reports…`);
+
+    for (const report of pending) {
+      // Atomically claim the report — skip if another sync beat us to it
+      const claimed = await markReportSyncing(report.id);
+      if (!claimed) {
+        console.log(`[SyncManager] Skipping ${report.id} — already claimed`);
+        continue;
+      }
+
+      try {
+        await uploadReport(report);
+        await deleteReport(report.id);
+        console.log(`[SyncManager] Synced: ${report.id}`);
+      } catch (error) {
+        console.error(`[SyncManager] Failed: ${report.id}`, error);
+        await markReportPending(report.id); // immediate reset of failed ones
+      }
     }
+  } finally {
+    isSyncing = false;
   }
-
-  isSyncing = false;
-  console.log('[SyncManager] Sync cycle complete.');
 };
 
 async function uploadReport(report: Report) {
@@ -46,3 +65,10 @@ async function uploadReport(report: Report) {
 
   return response.json();
 }
+
+let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+export const debouncedSync = () => {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(syncPendingReports, 2000);
+};
