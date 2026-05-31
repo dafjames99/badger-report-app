@@ -15,14 +15,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Report a Badger",
   description: "A report function for those who come across badger carcasses in Wales.",
-  icons: {
-    icon: [
-      {
-        url: "/badger-icon-new.png",
-        type: "image/png",
-      },
-    ]
-  }
+  // icons: {
+  //   icon: [
+  //     {
+  //       url: "/badger-icon-new.png",
+  //       type: "image/png",
+  //     },
+  //   ]
+  // }
 };
 
 export default function RootLayout({
