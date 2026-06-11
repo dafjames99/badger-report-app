@@ -9,6 +9,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig = {
   // Your existing Next.js config
+  allowedDevOrigins: ['192.168.1.98']
 };
 
 export default withSerwist(nextConfig);
