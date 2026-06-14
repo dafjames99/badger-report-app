@@ -5,7 +5,8 @@ import {
   resetStuckSyncingReports,
   Report,
   markReportPending,
-  getDB
+  getDB,
+  saveReport,
 } from './db';
 
 let isSyncing = false;
@@ -86,4 +87,31 @@ let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 export const debouncedSync = () => {
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(syncPendingReports, 2000);
+};
+
+export type SubmitOutcome = 'uploaded' | 'queued';
+
+/**
+ * Save a report to IndexedDB, then immediately attempt to upload it if online.
+ * Returns 'uploaded' if the server confirmed receipt, 'queued' if the report
+ * was saved locally and will be retried on the next sync.
+ */
+export const submitReport = async (
+  reportData: Omit<Report, 'id' | 'syncStatus'>
+): Promise<SubmitOutcome> => {
+  const id = await saveReport(reportData);
+
+  if (!navigator.onLine) return 'queued';
+
+  const db = await getDB();
+  const report = db ? await db.get('reports', id) : null;
+  if (!report) return 'queued';
+
+  try {
+    await uploadReport(report);
+    await deleteReport(id);
+    return 'uploaded';
+  } catch {
+    return 'queued';
+  }
 };
