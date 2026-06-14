@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 // Intercept the API so tests don't need real Google Sheets / email credentials
 test.beforeEach(async ({ page }) => {
@@ -11,24 +11,25 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-async function fillRequiredFields(page: Parameters<typeof test>[1] extends (args: { page: infer P }) => unknown ? P : never) {
-  // Select "Use current location" and wait for GPS or mock it
-  // In CI there's no real GPS, so we use the map picker instead
+async function waitForApp(page: Page) {
+  // Verify the actual app has loaded — fails fast if Vercel auth is blocking the page
+  await expect(page.getByRole('heading', { name: /badger report/i })).toBeVisible({ timeout: 15_000 });
+}
+
+async function fillRequiredFields(page: Page) {
   await page.getByRole('button', { name: /select on map/i }).click();
-  // Click the map to place a pin — Leaflet canvas/div is the target
   const mapContainer = page.locator('.leaflet-container');
   await mapContainer.waitFor();
   await mapContainer.click({ position: { x: 200, y: 150 } });
-
-  // Set suitability
   await page.getByRole('button', { name: /^yes$/i }).click();
 }
 
 test.describe('Report form', () => {
   test('submit button is disabled until location and suitability are set', async ({ page }) => {
     await page.goto('/');
-    const submitBtn = page.getByRole('button', { name: /dispatch report/i });
+    await waitForApp(page);
 
+    const submitBtn = page.getByRole('button', { name: /dispatch report/i });
     await expect(submitBtn).toBeDisabled();
 
     await page.getByRole('button', { name: /select on map/i }).click();
@@ -45,6 +46,7 @@ test.describe('Report form', () => {
 
   test('happy path: shows "submitted successfully" and fires POST immediately', async ({ page }) => {
     await page.goto('/');
+    await waitForApp(page);
 
     const postedRequests: string[] = [];
     page.on('request', (req) => {
@@ -62,6 +64,7 @@ test.describe('Report form', () => {
 
   test('offline: shows "saved" banner and does not POST to server', async ({ page, context }) => {
     await page.goto('/');
+    await waitForApp(page);
     await context.setOffline(true);
 
     const postedRequests: string[] = [];
@@ -79,12 +82,12 @@ test.describe('Report form', () => {
   });
 
   test('server error: shows "saved" banner (report queued for retry)', async ({ page }) => {
-    // Override the route to return a 500
     await page.route('/api/reports', async (route) => {
       await route.fulfill({ status: 500, body: JSON.stringify({ error: 'Server error' }) });
     });
 
     await page.goto('/');
+    await waitForApp(page);
     await fillRequiredFields(page);
     await page.getByRole('button', { name: /dispatch report/i }).click();
 
@@ -93,12 +96,13 @@ test.describe('Report form', () => {
 
   test('form validation: cannot submit without suitability answer', async ({ page }) => {
     await page.goto('/');
+    await waitForApp(page);
+
     await page.getByRole('button', { name: /select on map/i }).click();
     const mapContainer = page.locator('.leaflet-container');
     await mapContainer.waitFor();
     await mapContainer.click({ position: { x: 200, y: 150 } });
 
-    // Suitability not set — button must remain disabled
     await expect(page.getByRole('button', { name: /dispatch report/i })).toBeDisabled();
   });
 });

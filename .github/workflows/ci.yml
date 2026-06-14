@@ -44,3 +44,10 @@ jobs:
         run: npx playwright test --project=${{ matrix.browser }}
         env:
           BASE_URL: ${{ github.event.deployment_status.target_url }}
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 7
