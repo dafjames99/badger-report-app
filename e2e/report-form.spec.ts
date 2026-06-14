@@ -65,6 +65,12 @@ test.describe('Report form', () => {
   test('offline: shows "saved" banner and does not POST to server', async ({ page, context }) => {
     await page.goto('/');
     await waitForApp(page);
+
+    // Load the map while online so the dynamic import chunk can download,
+    // then go offline before submitting so we test the actual offline path.
+    await page.getByRole('button', { name: /select on map/i }).click();
+    const mapContainer = page.locator('.leaflet-container');
+    await mapContainer.waitFor();
     await context.setOffline(true);
 
     const postedRequests: string[] = [];
@@ -74,7 +80,8 @@ test.describe('Report form', () => {
       }
     });
 
-    await fillRequiredFields(page);
+    await mapContainer.click({ position: { x: 200, y: 150 } });
+    await page.getByRole('button', { name: /^yes$/i }).click();
     await page.getByRole('button', { name: /dispatch report/i }).click();
 
     await expect(page.getByText(/will upload when connection is available/i)).toBeVisible();
