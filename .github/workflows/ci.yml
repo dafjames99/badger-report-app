@@ -5,10 +5,12 @@ on:
     branches: ['**']
   pull_request:
     branches: [main]
+  deployment_status:
 
 jobs:
   unit:
     name: Unit tests
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,15 +24,16 @@ jobs:
 
   e2e:
     name: E2E tests (${{ matrix.browser }})
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
-    # If BASE_URL is set (e.g. from a Vercel preview), run against that.
-    # Otherwise the Playwright webServer config starts Next.js locally.
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, webkit]
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -40,4 +43,4 @@ jobs:
       - name: Run Playwright (${{ matrix.browser }})
         run: npx playwright test --project=${{ matrix.browser }}
         env:
-          BASE_URL: ${{ vars.VERCEL_PREVIEW_URL }}
+          BASE_URL: ${{ github.event.deployment_status.target_url }}
