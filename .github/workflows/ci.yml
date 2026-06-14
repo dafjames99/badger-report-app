@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run --coverage
+
+  e2e:
+    name: E2E tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    # If BASE_URL is set (e.g. from a Vercel preview), run against that.
+    # Otherwise the Playwright webServer config starts Next.js locally.
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install ${{ matrix.browser }} --with-deps
+      - name: Run Playwright (${{ matrix.browser }})
+        run: npx playwright test --project=${{ matrix.browser }}
+        env:
+          BASE_URL: ${{ vars.VERCEL_PREVIEW_URL }}
