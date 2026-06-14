@@ -5,8 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { compressImage } from '@/lib/image-utils';
-import { saveReport } from '@/lib/db';
-import { debouncedSync } from '@/lib/syncManager';
+import { submitReport, debouncedSync } from '@/lib/syncManager';
 import type { MapPosition } from '@/components/LocationMapPicker';
 
 const LocationMapPicker = dynamic(() => import('@/components/LocationMapPicker'), {
@@ -152,9 +151,9 @@ export default function ReportForm() {
       if (photo) {
         compressedPhoto = await compressImage(photo);
       }
-      const now = Date.now()
+      const now = Date.now();
 
-      await saveReport({
+      const outcome = await submitReport({
         timestamp: now,
         updatedAt: now,
         suitability: { collectionSuitable },
@@ -170,14 +169,15 @@ export default function ReportForm() {
 
       setStatus('success');
       setMessage(
-        isOnline ? 'Report submitted successfully!' : 'Offline: Report saved locally and will sync when online.'
+        outcome === 'uploaded'
+          ? 'Report submitted successfully!'
+          : 'Report saved — will upload when connection is available.'
       );
       setPhoto(null);
       setExtraInformation('');
 
-      if (isOnline) {
-        debouncedSync();
-      }
+      // Flush any other reports that may be queued
+      debouncedSync();
     } catch (err) {
       console.error(err);
       setStatus('error');
