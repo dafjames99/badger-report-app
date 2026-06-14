@@ -44,6 +44,7 @@ jobs:
         run: npx playwright test --project=${{ matrix.browser }}
         env:
           BASE_URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       - name: Upload screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
