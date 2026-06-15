@@ -36,8 +36,15 @@ export const sendReportEmail = async (
   const pass = process.env.EMAIL_SERVER_PASSWORD;
   const from = process.env.EMAIL_FROM;
   const to = process.env.EMAIL_TO;
+  const testTo = process.env.TEST_EMAIL_TO;
 
-  if (!host || !user || !pass || !from || !to) {
+  const isTest = report.reporter?.email === 'test@test.test';
+  // Test reports go only to TEST_EMAIL_TO; production reports go to both.
+  const recipients = isTest
+    ? testTo
+    : [to, testTo].filter(Boolean).join(',');
+
+  if (!host || !user || !pass || !from || !recipients) {
     console.warn('[Email] Configuration missing, skipping email alert.');
     return { sent: false, skipped: true };
   }
@@ -56,7 +63,7 @@ export const sendReportEmail = async (
 
   await transporter.sendMail({
     from,
-    to,
+    to: recipients,
     subject: `Badger Report: ${new Date(report.timestamp).toLocaleDateString()} (${report.id})`,
     html,
     attachments: photoAttachments(photo),
