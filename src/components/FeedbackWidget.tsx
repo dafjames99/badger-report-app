@@ -112,6 +112,7 @@ export function FeedbackWidget() {
                                 <label className="sr-only" htmlFor="details">Details</label>
                                 <textarea
                                     id="details"
+                                    name="details"
                                     suppressHydrationWarning
                                     rows={5}
                                     required
