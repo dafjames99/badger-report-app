@@ -37,8 +37,12 @@ export default function ReportForm() {
   const [mapPosition, setMapPosition] = useState<MapPosition | null>(null);
   const [mapInitialCenter, setMapInitialCenter] = useState<MapPosition | undefined>(undefined);
 
+  const [mapConfirmed, setMapConfirmed] = useState(false);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
+
   const [photo, setPhoto] = useState<File | null>(null);
   const [collectionSuitable, setCollectionSuitable] = useState<boolean | null>(null);
+  const [showCarcassHelp, setShowCarcassHelp] = useState(false);
   const [reporter, setReporter] = useState({
     name: '',
     email: '',
@@ -98,6 +102,8 @@ export default function ReportForm() {
     clearGps();
     setReportLocation(null);
     setMapPosition(null);
+    setMapConfirmed(false);
+    setMapFullscreen(false);
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -188,20 +194,22 @@ export default function ReportForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-lg mx-auto p-6 space-y-8 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
+      className="max-w-lg mx-auto p-4 space-y-5 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
     >
-      <header className="space-y-2 pt-4">
-        <h1 className="text-4xl font-surface-bg tracking-tight bg-linear-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
+      <header className="pt-2">
+        <h1 className="text-3xl font-surface-bg tracking-tight bg-linear-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
           WVSC Badger Report
         </h1>
       </header>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <span className="text-text-description text-sm font-medium">
-          If you find a dead badger, report it to us using the form below.
+          Found a dead badger? Report where it is so our team can find and collect it.
+          Reports help us recover intact badgers for scientific study.
         </span>
-        <span className="text-text-description text-sm font-medium">
-          Please include as much information as possible.
+        <span className="text-text-placeholder text-xs font-medium">
+          Only the location and carcass condition are required — everything else is
+          optional but helps us.
         </span>
       </div>
 
@@ -212,9 +220,10 @@ export default function ReportForm() {
         </div>
       )}
 
-      <section className="p-5 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-4 transition-all">
+      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-3 transition-all">
         <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
           Report location
+          <span className="ml-2 text-[10px] font-bold text-status-error opacity-90">Required</span>
         </h2>
 
         <div className="grid grid-cols-2 gap-2">
@@ -282,18 +291,44 @@ export default function ReportForm() {
         )}
 
         {locationMode === 'map' && (
-          <div className="space-y-3">
-            <LocationMapPicker
-              position={mapPosition}
-              onPositionChange={handleMapPositionChange}
-              initialCenter={mapInitialCenter}
-            />
-            {reportLocation?.source === 'map' ? (
+          mapConfirmed && reportLocation?.source === 'map' ? (
+            <div className="flex items-center justify-between gap-3">
               <LocationSummary location={reportLocation} />
-            ) : (
-              <p className="text-text-placeholder text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => setMapConfirmed(false)}
+                className="shrink-0 text-xs font-bold px-4 py-2 bg-surface-element hover:bg-surface-element-hover rounded-full transition-all active:scale-95 border border-border-base"
+              >
+                Adjust pin
+              </button>
+            </div>
+          ) : (
+            <div className={mapFullscreen
+              ? 'fixed inset-0 z-50 flex flex-col p-4 gap-3 bg-root'
+              : 'space-y-3'
+            }>
+              <LocationMapPicker
+                position={mapPosition}
+                onPositionChange={handleMapPositionChange}
+                initialCenter={mapInitialCenter}
+                isFullscreen={mapFullscreen}
+                onToggleFullscreen={() => setMapFullscreen(v => !v)}
+              />
+              {reportLocation?.source === 'map' ? (
+                <LocationSummary location={reportLocation} />
+              ) : (
+                <p className="text-text-placeholder text-xs font-medium shrink-0">No pin placed yet — tap the map to set the location.</p>
+              )}
+              <button
+                type="button"
+                disabled={!mapPosition}
+                onClick={() => { setMapConfirmed(true); setMapFullscreen(false); }}
+                className="w-full shrink-0 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg disabled:bg-button-disabled disabled:border-border-muted disabled:text-text-disabled disabled:shadow-none disabled:active:scale-100"
+              >
+                Confirm location
+              </button>
+            </div>
+          )
         )}
 
         {locationMode === null && (
@@ -301,20 +336,53 @@ export default function ReportForm() {
         )}
       </section>
 
-      <section className="flex items-center justify-between p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover">
-        <div>
-          <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
-          <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
+      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-3 transition-all">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
+            Carcass condition
+            <span className="ml-2 text-[10px] font-bold text-status-error opacity-90">Required</span>
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowCarcassHelp((v) => !v)}
+            aria-expanded={showCarcassHelp}
+            aria-label="What does intact mean?"
+            className={`shrink-0 w-5 h-5 rounded-full border text-[11px] font-bold leading-none transition-all active:scale-90 ${showCarcassHelp
+              ? 'bg-action-primary border-action-hover text-text-enabled'
+              : 'border-border-base text-text-placeholder hover:text-text-muted hover:border-text-placeholder'
+              }`}
+          >
+            ?
+          </button>
         </div>
 
-        {/* Yes/No Button Group */}
-        <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted">
+        {showCarcassHelp && (
+          <div className="rounded-xl border border-border-muted bg-surface-element p-3 text-sm leading-relaxed text-text-description space-y-3 animate-in fade-in slide-in-from-top-1">
+            <p>
+              <span className="font-bold text-text-base">Intact</span> means the body is largely
+              whole — the skin has not ruptured, it has not been flattened, and it is not
+              badly decomposed.
+            </p>
+            <p>
+              <span className="font-bold text-text-base">If you&apos;re not sure,</span> choose{' '}
+              <span className="font-bold text-success-primary">Yes</span>{' '}
+              and add a note below — we&apos;d rather check than miss one.
+            </p>
+          </div>
+        )}
+
+        <p className="text-sm font-medium text-text-description">
+          Is the carcass intact?{' '}
+          <span className="text-text-placeholder">Suitable for scientific collection.</span>
+        </p>
+
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setCollectionSuitable(true)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === true
-              ? 'bg-success-primary text-white shadow-sm'
-              : 'text-text-muted hover:bg-surface-element-hover'
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${collectionSuitable === true
+              ? 'bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             Yes
@@ -322,9 +390,9 @@ export default function ReportForm() {
           <button
             type="button"
             onClick={() => setCollectionSuitable(false)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === false
-              ? 'bg-brand-end text-white shadow-sm' // Replace with your theme's "No/Danger/Neutral" color if needed
-              : 'text-text-muted hover:bg-surface-element-hover'
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${collectionSuitable === false
+              ? 'bg-brand-end border-brand-end text-text-enabled shadow-lg'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             No
@@ -332,35 +400,68 @@ export default function ReportForm() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">
-          Evidence Photo
-          <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
-        </label>
-        <div className="relative group overflow-hidden rounded-2xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-            className="absolute inset-0 opacity-0 z-10 cursor-pointer"
-          />
-          <div className="p-8 text-center space-y-2">
-            <div className="mx-auto w-10 h-10 rounded-full bg-surface-element flex items-center justify-center group-hover:bg-action-hover/50 group-hover:text-brand-start transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <section className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-text-placeholder">
+            Evidence Photo
+            <span className="ml-2 text-xs font-medium opacity-70">(optional)</span>
+          </span>
+          <div className="flex gap-2 shrink-0">
+            <label
+              className="cursor-pointer flex items-center justify-center w-11 h-11 rounded-xl border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95"
+              aria-label="Take photo"
+              title="Take photo"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.107-1.107A2 2 0 0010.192 3H9.808a2 2 0 00-1.414.586L7.287 4.707A1 1 0 016.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
                   clipRule="evenodd"
                 />
               </svg>
-            </div>
-            <p className="text-sm font-medium text-text-description">{photo ? photo.name : 'Tap to capture photo'}</p>
+            </label>
+            <label
+              className="cursor-pointer flex items-center justify-center w-11 h-11 rounded-xl border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95"
+              aria-label="Choose from library"
+              title="Choose from library"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </label>
           </div>
-          {photo && (
-            <div className="h-1 bg-action-hover w-full animate-shimmer bg-linear-to-r from-action-hover via-success-hover to-action-primary bg-size-200%_100%" />
-          )}
         </div>
+        {photo && (
+          <div className="flex items-center gap-2 rounded-xl border border-border-muted bg-surface-element px-3 py-2">
+            <span className="h-2 w-2 rounded-full bg-success-primary shrink-0" />
+            <span className="text-xs font-medium text-text-description truncate flex-1">{photo.name}</span>
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              aria-label="Remove photo"
+              className="shrink-0 text-text-placeholder hover:text-status-error text-sm font-bold leading-none px-1 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </section>
 
 
@@ -376,7 +477,7 @@ export default function ReportForm() {
             placeholder="Your Name"
             value={reporter.name}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="email"
@@ -384,7 +485,7 @@ export default function ReportForm() {
             placeholder="Email Address"
             value={reporter.email}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="tel"
@@ -392,7 +493,7 @@ export default function ReportForm() {
             placeholder="Phone Number"
             value={reporter.phone}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
         </div>
       </section>
@@ -408,21 +509,21 @@ export default function ReportForm() {
         <textarea
           id="extra-information"
           name="extraInformation"
-          rows={5}
+          rows={3}
           value={extraInformation}
           onChange={(e) => setExtraInformation(e.target.value)}
           placeholder={`- Is the badger roadside, in a field, or in woodland?
 - Is the location rough or exact?
 - Are you certain this is a badger?`}
-          className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-32"
+          className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-20"
         />
       </section>
 
-      <div className="pt-6 pb-12">
+      <div className="pt-2 pb-6">
         <button
           type="submit"
           disabled={status === 'submitting' || !reportLocation || collectionSuitable === null}
-          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-success-primary hover:bg-success-hover disabled:bg-brand-end font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
+          className="w-full relative group overflow-hidden py-4 px-6 rounded-2xl bg-success-primary hover:bg-success-hover disabled:bg-brand-end font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
         >
           <span className="relative z-10">
             {status === 'submitting' ? (

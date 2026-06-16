@@ -26,6 +26,16 @@ function resolveTemplate(): EmailTemplateId {
   return DEFAULT_TEMPLATE;
 }
 
+function resolveSheetUrl(): string | undefined {
+  const explicit = process.env.GOOGLE_SHEET_URL;
+  if (explicit) return explicit;
+
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (sheetId) return `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+
+  return undefined;
+}
+
 export const sendReportEmail = async (
   report: ReportEmailData,
   photo?: ReportPhoto
@@ -59,7 +69,7 @@ export const sendReportEmail = async (
     auth: { user, pass },
   });
 
-  const html = buildReportEmailHtml(report, template, hasPhoto);
+  const html = buildReportEmailHtml(report, template, hasPhoto, resolveSheetUrl());
 
   await transporter.sendMail({
     from,
