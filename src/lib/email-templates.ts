@@ -84,7 +84,28 @@ function photoSectionCard(hasPhoto: boolean): string {
     </div>`;
 }
 
-function buildClassicTemplate(report: ReportEmailData, hasPhoto: boolean): string {
+function sheetLinkClassic(sheetUrl?: string): string {
+  if (!sheetUrl) return '';
+  return `<p><strong>All reports:</strong> <a href="${sheetUrl}">Open the Google Sheet &rarr;</a></p>`;
+}
+
+function sheetLinkTable(sheetUrl?: string): string {
+  if (!sheetUrl) return '';
+  return `<p style="font-family:Arial,sans-serif;font-size:14px;margin:16px 0 0;">
+      <a href="${sheetUrl}" style="color:#2563eb;">Open the Google Sheet &rarr;</a>
+      <span style="color:#6b7280;"> — view and manage all reports</span>
+    </p>`;
+}
+
+function sheetLinkCard(sheetUrl?: string): string {
+  if (!sheetUrl) return '';
+  return `<div style="margin-top:16px;padding:14px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;">
+        <a href="${sheetUrl}" style="color:#1d4ed8;font-size:14px;font-weight:600;text-decoration:none;">Open the Google Sheet &rarr;</a>
+        <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">View and manage all reports</p>
+      </div>`;
+}
+
+function buildClassicTemplate(report: ReportEmailData, hasPhoto: boolean, sheetUrl?: string): string {
   return `
     <h1>New Badger Report</h1>
     <p><strong>Report ID:</strong> ${report.id}</p>
@@ -94,10 +115,11 @@ function buildClassicTemplate(report: ReportEmailData, hasPhoto: boolean): strin
     <p><strong>Reporter:</strong> ${formatReporter(report.reporter)}</p>
     <p><strong>Extra information:</strong> ${formatExtraInformation(report.extraInformation)}</p>
     ${photoSectionClassic(hasPhoto)}
+    ${sheetLinkClassic(sheetUrl)}
   `;
 }
 
-function buildTableTemplate(report: ReportEmailData, hasPhoto: boolean): string {
+function buildTableTemplate(report: ReportEmailData, hasPhoto: boolean, sheetUrl?: string): string {
   const suitable = report.suitability.collectionSuitable;
   return `
     <h1 style="font-family:Arial,sans-serif;font-size:22px;margin:0 0 16px;">New Badger Report</h1>
@@ -135,10 +157,11 @@ function buildTableTemplate(report: ReportEmailData, hasPhoto: boolean): string 
       </tr>
       ${photoSectionTable(hasPhoto)}
     </table>
+    ${sheetLinkTable(sheetUrl)}
   `;
 }
 
-function buildCardTemplate(report: ReportEmailData, hasPhoto: boolean): string {
+function buildCardTemplate(report: ReportEmailData, hasPhoto: boolean, sheetUrl?: string): string {
   const suitable = report.suitability.collectionSuitable;
   return `
     <div style="font-family:Arial,sans-serif;max-width:640px;color:#111827;">
@@ -167,6 +190,7 @@ function buildCardTemplate(report: ReportEmailData, hasPhoto: boolean): string {
           <p style="margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;">Extra Information</p>
           <p style="margin:0;font-size:15px;line-height:1.5;">${formatExtraInformation(report.extraInformation)}</p>
         </div>
+        ${sheetLinkCard(sheetUrl)}
       </div>
     </div>
   `;
@@ -175,16 +199,17 @@ function buildCardTemplate(report: ReportEmailData, hasPhoto: boolean): string {
 export function buildReportEmailHtml(
   report: ReportEmailData,
   template: EmailTemplateId,
-  hasPhoto: boolean
+  hasPhoto: boolean,
+  sheetUrl?: string
 ): string {
   switch (template) {
     case 'table':
-      return buildTableTemplate(report, hasPhoto);
+      return buildTableTemplate(report, hasPhoto, sheetUrl);
     case 'card':
-      return buildCardTemplate(report, hasPhoto);
+      return buildCardTemplate(report, hasPhoto, sheetUrl);
     case 'classic':
     default:
-      return buildClassicTemplate(report, hasPhoto);
+      return buildClassicTemplate(report, hasPhoto, sheetUrl);
   }
 }
 
