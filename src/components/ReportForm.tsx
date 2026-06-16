@@ -393,45 +393,53 @@ export default function ReportForm() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        <label className="block text-xs font-bold uppercase tracking-widest text-text-placeholder">
-          Evidence Photo
-          <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95">
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-              className="hidden"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.107-1.107A2 2 0 0010.192 3H9.808a2 2 0 00-1.414.586L7.287 4.707A1 1 0 016.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
-                clipRule="evenodd"
+      <section className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-text-placeholder">
+            Evidence Photo
+            <span className="ml-2 text-xs font-medium opacity-70">(optional)</span>
+          </span>
+          <div className="flex gap-2 shrink-0">
+            <label
+              className="cursor-pointer flex items-center justify-center w-11 h-11 rounded-xl border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95"
+              aria-label="Take photo"
+              title="Take photo"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+                className="hidden"
               />
-            </svg>
-            Take photo
-          </label>
-          <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-              className="hidden"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                clipRule="evenodd"
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.107-1.107A2 2 0 0010.192 3H9.808a2 2 0 00-1.414.586L7.287 4.707A1 1 0 016.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </label>
+            <label
+              className="cursor-pointer flex items-center justify-center w-11 h-11 rounded-xl border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95"
+              aria-label="Choose from library"
+              title="Choose from library"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+                className="hidden"
               />
-            </svg>
-            Choose photo
-          </label>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </label>
+          </div>
         </div>
         {photo && (
           <div className="flex items-center gap-2 rounded-xl border border-border-muted bg-surface-element px-3 py-2">
