@@ -38,6 +38,15 @@ interface LocationMapPickerProps {
   onToggleFullscreen?: () => void;
 }
 
+function MapSizeInvalidator({ isFullscreen }: { isFullscreen: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 50);
+    return () => clearTimeout(timer);
+  }, [isFullscreen, map]);
+  return null;
+}
+
 function MapClickHandler({ onPositionChange }: { onPositionChange: (position: MapPosition) => void }) {
   useMapEvents({
     click(e) {
@@ -102,6 +111,7 @@ export default function LocationMapPicker({
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
+            <MapSizeInvalidator isFullscreen={isFullscreen} />
             <MapClickHandler onPositionChange={onPositionChange} />
             <MapViewController position={position} initialCenter={initialCenter} />
             {position && (
