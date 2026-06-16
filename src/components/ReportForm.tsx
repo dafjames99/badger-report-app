@@ -38,6 +38,7 @@ export default function ReportForm() {
   const [mapInitialCenter, setMapInitialCenter] = useState<MapPosition | undefined>(undefined);
 
   const [mapConfirmed, setMapConfirmed] = useState(false);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [collectionSuitable, setCollectionSuitable] = useState<boolean | null>(null);
@@ -102,6 +103,7 @@ export default function ReportForm() {
     setReportLocation(null);
     setMapPosition(null);
     setMapConfirmed(false);
+    setMapFullscreen(false);
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -301,22 +303,27 @@ export default function ReportForm() {
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className={mapFullscreen
+              ? 'fixed inset-0 z-50 flex flex-col p-4 gap-3 bg-root'
+              : 'space-y-3'
+            }>
               <LocationMapPicker
                 position={mapPosition}
                 onPositionChange={handleMapPositionChange}
                 initialCenter={mapInitialCenter}
+                isFullscreen={mapFullscreen}
+                onToggleFullscreen={() => setMapFullscreen(v => !v)}
               />
               {reportLocation?.source === 'map' ? (
                 <LocationSummary location={reportLocation} />
               ) : (
-                <p className="text-text-placeholder text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
+                <p className="text-text-placeholder text-xs font-medium shrink-0">No pin placed yet — tap the map to set the location.</p>
               )}
               <button
                 type="button"
                 disabled={!mapPosition}
-                onClick={() => setMapConfirmed(true)}
-                className="w-full py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg disabled:bg-button-disabled disabled:border-border-muted disabled:text-text-disabled disabled:shadow-none disabled:active:scale-100"
+                onClick={() => { setMapConfirmed(true); setMapFullscreen(false); }}
+                className="w-full shrink-0 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg disabled:bg-button-disabled disabled:border-border-muted disabled:text-text-disabled disabled:shadow-none disabled:active:scale-100"
               >
                 Confirm location
               </button>
