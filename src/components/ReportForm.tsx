@@ -37,8 +37,11 @@ export default function ReportForm() {
   const [mapPosition, setMapPosition] = useState<MapPosition | null>(null);
   const [mapInitialCenter, setMapInitialCenter] = useState<MapPosition | undefined>(undefined);
 
+  const [mapConfirmed, setMapConfirmed] = useState(false);
+
   const [photo, setPhoto] = useState<File | null>(null);
   const [collectionSuitable, setCollectionSuitable] = useState<boolean | null>(null);
+  const [showCarcassHelp, setShowCarcassHelp] = useState(false);
   const [reporter, setReporter] = useState({
     name: '',
     email: '',
@@ -98,6 +101,7 @@ export default function ReportForm() {
     clearGps();
     setReportLocation(null);
     setMapPosition(null);
+    setMapConfirmed(false);
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -285,18 +289,39 @@ export default function ReportForm() {
         )}
 
         {locationMode === 'map' && (
-          <div className="space-y-3">
-            <LocationMapPicker
-              position={mapPosition}
-              onPositionChange={handleMapPositionChange}
-              initialCenter={mapInitialCenter}
-            />
-            {reportLocation?.source === 'map' ? (
+          mapConfirmed && reportLocation?.source === 'map' ? (
+            <div className="flex items-center justify-between gap-3">
               <LocationSummary location={reportLocation} />
-            ) : (
-              <p className="text-text-placeholder text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => setMapConfirmed(false)}
+                className="shrink-0 text-xs font-bold px-4 py-2 bg-surface-element hover:bg-surface-element-hover rounded-full transition-all active:scale-95 border border-border-base"
+              >
+                Adjust pin
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <LocationMapPicker
+                position={mapPosition}
+                onPositionChange={handleMapPositionChange}
+                initialCenter={mapInitialCenter}
+              />
+              {reportLocation?.source === 'map' ? (
+                <LocationSummary location={reportLocation} />
+              ) : (
+                <p className="text-text-placeholder text-xs font-medium">No pin placed yet — tap the map to set the location.</p>
+              )}
+              <button
+                type="button"
+                disabled={!mapPosition}
+                onClick={() => setMapConfirmed(true)}
+                className="w-full py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg disabled:bg-button-disabled disabled:border-border-muted disabled:text-text-disabled disabled:shadow-none disabled:active:scale-100"
+              >
+                Confirm location
+              </button>
+            </div>
+          )
         )}
 
         {locationMode === null && (
@@ -304,24 +329,52 @@ export default function ReportForm() {
         )}
       </section>
 
-      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h3 className="font-bold text-text-muted">
-              Is the carcass intact?
-              <span className="ml-2 text-[10px] font-bold text-status-error opacity-90 align-middle">Required</span>
-            </h3>
-            <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
-          </div>
+      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-3 transition-all">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
+            Carcass condition
+            <span className="ml-2 text-[10px] font-bold text-status-error opacity-90">Required</span>
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowCarcassHelp((v) => !v)}
+            aria-expanded={showCarcassHelp}
+            aria-label="What does intact mean?"
+            className={`shrink-0 w-5 h-5 rounded-full border text-[11px] font-bold leading-none transition-all active:scale-90 ${showCarcassHelp
+              ? 'bg-action-primary border-action-hover text-text-enabled'
+              : 'border-border-base text-text-placeholder hover:text-text-muted hover:border-text-placeholder'
+              }`}
+          >
+            ?
+          </button>
+        </div>
 
-        {/* Yes/No Button Group */}
-        <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted shrink-0">
+        {showCarcassHelp && (
+          <div className="rounded-xl border border-border-muted bg-surface-element p-3 text-xs leading-relaxed text-text-description space-y-2 animate-in fade-in slide-in-from-top-1">
+            <p>
+              <span className="font-semibold text-text-base">Intact</span> means the body is whole
+              and fresh — not badly decomposed, dried out, or flattened.
+            </p>
+            <p>
+              If you&apos;re not sure, choose{' '}
+              <span className="font-semibold text-success-primary">Yes</span> and add a note below.
+              We&apos;d rather check than miss one.
+            </p>
+          </div>
+        )}
+
+        <p className="text-sm font-medium text-text-description">
+          Is the carcass intact?{' '}
+          <span className="text-text-placeholder">Suitable for scientific collection.</span>
+        </p>
+
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setCollectionSuitable(true)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === true
-              ? 'bg-success-primary text-white shadow-sm'
-              : 'text-text-muted hover:bg-surface-element-hover'
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${collectionSuitable === true
+              ? 'bg-success-primary border-success-hover text-text-enabled shadow-lg shadow-success-bg'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             Yes
@@ -329,21 +382,14 @@ export default function ReportForm() {
           <button
             type="button"
             onClick={() => setCollectionSuitable(false)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${collectionSuitable === false
-              ? 'bg-brand-end text-white shadow-sm' // Replace with your theme's "No/Danger/Neutral" color if needed
-              : 'text-text-muted hover:bg-surface-element-hover'
+            className={`py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border transition-all active:scale-95 ${collectionSuitable === false
+              ? 'bg-brand-end border-brand-end text-text-enabled shadow-lg'
+              : 'bg-surface-card border-border-base text-text-description hover:border-text-placeholder hover:text-text-muted'
               }`}
           >
             No
           </button>
         </div>
-        </div>
-        <p className="text-xs text-text-placeholder font-medium leading-relaxed">
-          <span className="font-semibold text-text-description">Intact</span> means the body is
-          whole and fresh — not badly decomposed, dried out, or flattened. If you&apos;re not
-          sure, choose <span className="font-semibold text-text-description">Yes</span> and add a
-          note below; we&apos;d rather check than miss one.
-        </p>
       </section>
 
       <section className="space-y-3">
@@ -351,31 +397,55 @@ export default function ReportForm() {
           Evidence Photo
           <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
         </label>
-        <div className="relative group overflow-hidden rounded-xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-            className="absolute inset-0 opacity-0 z-10 cursor-pointer"
-          />
-          <div className="flex items-center gap-3 p-3">
-            <div className="shrink-0 w-9 h-9 rounded-full bg-surface-element flex items-center justify-center group-hover:bg-action-hover/50 group-hover:text-brand-start transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.107-1.107A2 2 0 0010.192 3H9.808a2 2 0 00-1.414.586L7.287 4.707A1 1 0 016.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <p className="text-sm font-medium text-text-description truncate">
-              {photo ? photo.name : 'Take a photo or choose from your library'}
-            </p>
-          </div>
-          {photo && (
-            <div className="h-1 bg-action-hover w-full animate-shimmer bg-linear-to-r from-action-hover via-success-hover to-action-primary bg-size-200%_100%" />
-          )}
+        <div className="grid grid-cols-2 gap-2">
+          <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.107-1.107A2 2 0 0010.192 3H9.808a2 2 0 00-1.414.586L7.287 4.707A1 1 0 016.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Take photo
+          </label>
+          <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wide border border-border-base bg-surface-card text-text-description hover:border-text-placeholder hover:text-text-muted transition-all active:scale-95">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Choose photo
+          </label>
         </div>
+        {photo && (
+          <div className="flex items-center gap-2 rounded-xl border border-border-muted bg-surface-element px-3 py-2">
+            <span className="h-2 w-2 rounded-full bg-success-primary shrink-0" />
+            <span className="text-xs font-medium text-text-description truncate flex-1">{photo.name}</span>
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              aria-label="Remove photo"
+              className="shrink-0 text-text-placeholder hover:text-status-error text-sm font-bold leading-none px-1 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </section>
 
 
