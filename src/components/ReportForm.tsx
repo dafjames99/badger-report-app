@@ -188,10 +188,10 @@ export default function ReportForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-lg mx-auto p-6 space-y-8 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
+      className="max-w-lg mx-auto p-4 space-y-5 bg-root text-text-base min-h-screen selection:bg-action-hover/30"
     >
-      <header className="space-y-2 pt-4">
-        <h1 className="text-4xl font-surface-bg tracking-tight bg-linear-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
+      <header className="pt-2">
+        <h1 className="text-3xl font-surface-bg tracking-tight bg-linear-to-r from-brand-start via-brand-mid to-brand-end bg-clip-text text-transparent animate-gradient-x">
           WVSC Badger Report
         </h1>
       </header>
@@ -214,7 +214,7 @@ export default function ReportForm() {
         </div>
       )}
 
-      <section className="p-5 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-4 transition-all">
+      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-3 transition-all">
         <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
           Report location
           <span className="ml-2 text-[10px] font-bold text-status-error opacity-90">Required</span>
@@ -304,7 +304,7 @@ export default function ReportForm() {
         )}
       </section>
 
-      <section className="p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover space-y-3">
+      <section className="p-4 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover space-y-2">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="font-bold text-text-muted">
@@ -351,16 +351,15 @@ export default function ReportForm() {
           Evidence Photo
           <span className="ml-2 text-xs font-medium text-text-placeholder opacity-70">(optional)</span>
         </label>
-        <div className="relative group overflow-hidden rounded-2xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
+        <div className="relative group overflow-hidden rounded-xl border border-border-muted bg-surface-element transition-all hover:border-action-hover/50">
           <input
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={(e) => setPhoto(e.target.files?.[0] || null)}
             className="absolute inset-0 opacity-0 z-10 cursor-pointer"
           />
-          <div className="p-8 text-center space-y-2">
-            <div className="mx-auto w-10 h-10 rounded-full bg-surface-element flex items-center justify-center group-hover:bg-action-hover/50 group-hover:text-brand-start transition-colors">
+          <div className="flex items-center gap-3 p-3">
+            <div className="shrink-0 w-9 h-9 rounded-full bg-surface-element flex items-center justify-center group-hover:bg-action-hover/50 group-hover:text-brand-start transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
@@ -369,7 +368,9 @@ export default function ReportForm() {
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-text-description">{photo ? photo.name : 'Tap to capture photo'}</p>
+            <p className="text-sm font-medium text-text-description truncate">
+              {photo ? photo.name : 'Take a photo or choose from your library'}
+            </p>
           </div>
           {photo && (
             <div className="h-1 bg-action-hover w-full animate-shimmer bg-linear-to-r from-action-hover via-success-hover to-action-primary bg-size-200%_100%" />
@@ -390,7 +391,7 @@ export default function ReportForm() {
             placeholder="Your Name"
             value={reporter.name}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="email"
@@ -398,7 +399,7 @@ export default function ReportForm() {
             placeholder="Email Address"
             value={reporter.email}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
           <input
             type="tel"
@@ -406,7 +407,7 @@ export default function ReportForm() {
             placeholder="Phone Number"
             value={reporter.phone}
             onChange={handleReporterChange}
-            className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
+            className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled "
           />
         </div>
       </section>
@@ -422,21 +423,21 @@ export default function ReportForm() {
         <textarea
           id="extra-information"
           name="extraInformation"
-          rows={5}
+          rows={3}
           value={extraInformation}
           onChange={(e) => setExtraInformation(e.target.value)}
           placeholder={`- Is the badger roadside, in a field, or in woodland?
 - Is the location rough or exact?
 - Are you certain this is a badger?`}
-          className="w-full bg-surface-card border border-border-muted rounded-xl p-4 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-32"
+          className="w-full bg-surface-card border border-border-muted rounded-xl p-3 text-sm focus:ring-2 focus:ring-action-hover/50 focus:border-action-hover outline-none transition-all placeholder:text-text-disabled resize-y min-h-20"
         />
       </section>
 
-      <div className="pt-6 pb-12">
+      <div className="pt-2 pb-6">
         <button
           type="submit"
           disabled={status === 'submitting' || !reportLocation || collectionSuitable === null}
-          className="w-full relative group overflow-hidden py-5 px-6 rounded-2xl bg-success-primary hover:bg-success-hover disabled:bg-brand-end font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
+          className="w-full relative group overflow-hidden py-4 px-6 rounded-2xl bg-success-primary hover:bg-success-hover disabled:bg-brand-end font-surface-bg text-sm uppercase tracking-widest text-text-enabled shadow-2xl shadow-action-glow active:scale-95 transition-all disabled:opacity-30 disabled:active:scale-100 disabled:text-text-disabled"
         >
           <span className="relative z-10">
             {status === 'submitting' ? (
