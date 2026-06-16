@@ -196,12 +196,14 @@ export default function ReportForm() {
         </h1>
       </header>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <span className="text-text-description text-sm font-medium">
-          If you find a dead badger, report it to us using the form below.
+          Found a dead badger? Report where it is so our team can find and collect it.
+          Reports help us recover intact badgers for scientific study.
         </span>
-        <span className="text-text-description text-sm font-medium">
-          Please include as much information as possible.
+        <span className="text-text-placeholder text-xs font-medium">
+          Only the location and carcass condition are required — everything else is
+          optional but helps us.
         </span>
       </div>
 
@@ -215,6 +217,7 @@ export default function ReportForm() {
       <section className="p-5 rounded-2xl border border-border-muted bg-surface-card hover:bg-surface-element-hover shadow-sm group space-y-4 transition-all">
         <h2 className="text-xs font-bold uppercase tracking-widest text-text-placeholder group-hover:text-brand-start transition-colors">
           Report location
+          <span className="ml-2 text-[10px] font-bold text-status-error opacity-90">Required</span>
         </h2>
 
         <div className="grid grid-cols-2 gap-2">
@@ -301,14 +304,18 @@ export default function ReportForm() {
         )}
       </section>
 
-      <section className="flex items-center justify-between p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover">
-        <div>
-          <h3 className="font-bold text-text-muted">Intact Carcass?</h3>
-          <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
-        </div>
+      <section className="p-5 rounded-2xl border border-border-muted bg-surface-card shadow-sm transition-all hover:bg-surface-element-hover space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-text-muted">
+              Is the carcass intact?
+              <span className="ml-2 text-[10px] font-bold text-status-error opacity-90 align-middle">Required</span>
+            </h3>
+            <p className="text-xs text-text-placeholder font-medium">Suitable for scientific collection</p>
+          </div>
 
         {/* Yes/No Button Group */}
-        <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted">
+        <div className="flex gap-2 p-1 bg-button-disabled rounded-xl border border-border-muted shrink-0">
           <button
             type="button"
             onClick={() => setCollectionSuitable(true)}
@@ -330,6 +337,13 @@ export default function ReportForm() {
             No
           </button>
         </div>
+        </div>
+        <p className="text-xs text-text-placeholder font-medium leading-relaxed">
+          <span className="font-semibold text-text-description">Intact</span> means the body is
+          whole and fresh — not badly decomposed, dried out, or flattened. If you&apos;re not
+          sure, choose <span className="font-semibold text-text-description">Yes</span> and add a
+          note below; we&apos;d rather check than miss one.
+        </p>
       </section>
 
       <section className="space-y-3">
