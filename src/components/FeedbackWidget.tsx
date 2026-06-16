@@ -53,9 +53,9 @@ export function FeedbackWidget() {
             {/* Floating Action Button */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 z-40 rounded-full bg-brand-end px-4 py-3 text-sm font-semibold text-text-anti shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-end-dark focus:ring-offset-2"
+                className="fixed top-4 right-4 z-40 rounded-xl bg-brand-end px-3 py-2 text-xs font-semibold text-text-anti shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-end-dark focus:ring-offset-2 text-center leading-tight"
             >
-                Feedback / Bug?
+                Found a<br />bug?
             </button>
 
             {/* Success Banner */}

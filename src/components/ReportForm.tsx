@@ -352,8 +352,9 @@ export default function ReportForm() {
         {showCarcassHelp && (
           <div className="rounded-xl border border-border-muted bg-surface-element p-3 text-sm leading-relaxed text-text-description space-y-3 animate-in fade-in slide-in-from-top-1">
             <p>
-              <span className="font-bold text-text-base">Intact</span> means the body is whole and
-              fresh — not badly decomposed, dried out, or flattened.
+              <span className="font-bold text-text-base">Intact</span> means the body is largely
+              whole — the skin has not ruptured, it has not been flattened, and it is not
+              badly decomposed.
             </p>
             <p>
               <span className="font-bold text-text-base">If you&apos;re not sure,</span> choose{' '}
