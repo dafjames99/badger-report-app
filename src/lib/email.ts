@@ -74,7 +74,7 @@ export const sendReportEmail = async (
   await transporter.sendMail({
     from,
     to: recipients,
-    subject: `Badger Report: ${new Date(report.timestamp).toLocaleDateString()} (${report.id})`,
+    subject: `Badger Report: ${new Date(report.timestamp).toLocaleDateString("en-GB")} (${report.id})`,
     html,
     attachments: photoAttachments(photo),
   });

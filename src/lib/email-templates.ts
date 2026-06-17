@@ -32,7 +32,7 @@ function formatExtraInformation(extraInformation?: string): string {
 }
 
 function formatTimestamp(timestamp: number): string {
-  return new Date(timestamp).toLocaleString();
+  return new Date(timestamp).toLocaleString("en-GB");
 }
 
 function formatLocation(location: ReportEmailData['location']): string {
